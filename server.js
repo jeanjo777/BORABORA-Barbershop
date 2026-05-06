@@ -51,12 +51,10 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        input: {
-          prompt: fullPrompt,
-          image_url: base64Image,
-          aspect_ratio: '3:4',
-          safety_tolerance: 2
-        }
+        prompt: fullPrompt,
+        image_url: base64Image,
+        aspect_ratio: '3:4',
+        safety_tolerance: 2
       })
     });
 
