@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Simulateur de coiffure BORA-BORA Barbershop — Essayez une nouvelle coupe avant votre rendez-vous.">
+  <title>Simulateur de Coiffure | BORA-BORA Barbershop</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='56%25' text-anchor='middle' font-family='Oswald, sans-serif' font-size='28' font-weight='700' fill='%232ecc40'%3EBB%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+  <a href="#main" class="skip-link">Aller au contenu principal</a>
+
+  <!-- Navigation -->
+  <nav class="nav nav--scrolled" id="nav">
+    <div class="nav__container">
+      <a href="index.html" class="nav__logo">Bora<span>-</span>Bora</a>
+      <button class="nav__toggle" id="navToggle" aria-label="Ouvrir le menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav__menu" id="navMenu" role="list">
+        <li><a href="index.html#about" class="nav__link">Le Barbershop</a></li>
+        <li><a href="index.html#services" class="nav__link">Services</a></li>
+        <li><a href="index.html#gallery" class="nav__link">Galerie</a></li>
+        <li><a href="simulator.html" class="nav__link nav__link--active">Simulateur</a></li>
+        <li><a href="index.html#contact" class="nav__link nav__link--cta">Rendez-vous</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main id="main">
+
+    <!-- Simulator Hero -->
+    <section class="sim-hero">
+      <div class="container">
+        <p class="section-label">Intelligence Artificielle</p>
+        <h1 class="section-title">Simulateur de<br><em>Coiffure</em></h1>
+        <p class="sim-hero__desc">Uploadez votre photo, choisissez un style et visualisez le r&eacute;sultat avant de r&eacute;server.</p>
+      </div>
+    </section>
+
+    <!-- Step 1: Upload -->
+    <section class="sim-section" id="step-upload">
+      <div class="container">
+        <div class="sim-step">
+          <div class="sim-step__number">1</div>
+          <h2 class="sim-step__title">Votre Photo</h2>
+        </div>
+        <div class="sim-upload" id="uploadZone">
+          <input type="file" id="photoInput" accept="image/*" capture="user" class="sim-upload__input" aria-label="Choisir une photo">
+          <div class="sim-upload__placeholder" id="uploadPlaceholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+              <path d="M12 16V8m0 0l-3 3m3-3l3 3"/>
+              <path d="M3 16.5V18a3 3 0 003 3h12a3 3 0 003-3v-1.5"/>
+              <circle cx="12" cy="4" r="1"/>
+            </svg>
+            <p>Cliquez ou glissez votre photo ici</p>
+            <span>JPG, PNG &mdash; Photo de face recommand&eacute;e</span>
+          </div>
+          <div class="sim-upload__preview" id="uploadPreview" hidden>
+            <img id="previewImg" src="data:," alt="Votre photo">
+            <button type="button" class="sim-upload__change" id="changePhoto">Changer</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 2: Choose Style -->
+    <section class="sim-section" id="step-style">
+      <div class="container">
+        <div class="sim-step">
+          <div class="sim-step__number">2</div>
+          <h2 class="sim-step__title">Choisissez un Style</h2>
+        </div>
+        <div class="sim-styles" id="styleGrid">
+
+          <button type="button" class="sim-style" data-style="classic-fade" data-prompt="classic fade haircut, short sides gradually blending into longer hair on top, clean and professional look">
+            <div class="sim-style__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
+                <path d="M5 3C5 3 5 13 12 13C19 13 19 3 19 3"/>
+                <line x1="12" y1="13" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <span class="sim-style__name">Fade Classique</span>
+            <span class="sim-style__desc">D&eacute;grad&eacute; progressif, propre et polyvalent</span>
+          </button>
+
+          <button type="button" class="sim-style" data-style="buzz-cut" data-prompt="buzz cut, very short uniform length all over, military style clean cut">
+            <div class="sim-style__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
+                <circle cx="12" cy="10" r="7"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <span class="sim-style__name">Buzz Cut</span>
+            <span class="sim-style__desc">Court uniforme, style net et masculin</span>
+          </button>
+
+          <button type="button" class="sim-style" data-style="pompadour" data-prompt="modern pompadour hairstyle, volume on top swept back, faded sides, stylish and bold">
+            <div class="sim-style__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
+                <path d="M6 18c0-5 2-12 6-14 4 2 6 9 6 14"/>
+                <path d="M8 18h8"/>
+              </svg>
+            </div>
+            <span class="sim-style__name">Pompadour</span>
+            <span class="sim-style__desc">Volume sur le dessus, c&ocirc;t&eacute;s d&eacute;grad&eacute;s</span>
+          </button>
+
+          <button type="button" class="sim-style" data-style="textured-crop" data-prompt="textured crop haircut, short textured fringe on top, tapered sides, modern European style">
+            <div class="sim-style__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
+                <path d="M4 12h4m4 0h4m-4-4h4m-8 8h4"/>
+                <rect x="3" y="6" width="18" height="12" rx="2"/>
+              </svg>
+            </div>
+            <span class="sim-style__name">Textured Crop</span>
+            <span class="sim-style__desc">Frange textur&eacute;e, style europ&eacute;en moderne</span>
+          </button>
+
+          <button type="button" class="sim-style" data-style="undercut" data-prompt="undercut hairstyle, disconnected sides shaved very short, long hair on top slicked back or to the side">
+            <div class="sim-style__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
+                <path d="M4 16h16"/>
+                <path d="M6 16V8c0-3 2-5 6-5s6 2 6 5v8"/>
+              </svg>
+            </div>
+            <span class="sim-style__name">Undercut</span>
+            <span class="sim-style__desc">C&ocirc;t&eacute;s ras&eacute;s, dessus long et libre</span>
+          </button>
+
+          <button type="button" class="sim-style" data-style="slick-back" data-prompt="slick back hairstyle, hair combed smoothly backwards, medium length, clean sides, elegant and refined look">
+            <div class="sim-style__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
+                <path d="M5 12c0-5 3-9 7-9s7 4 7 9"/>
+                <path d="M8 12l4-3 4 3"/>
+              </svg>
+            </div>
+            <span class="sim-style__name">Slick Back</span>
+            <span class="sim-style__desc">Peign&eacute; vers l'arri&egrave;re, &eacute;l&eacute;gant</span>
+          </button>
+
+          <button type="button" class="sim-style" data-style="french-crop" data-prompt="french crop haircut, short straight fringe, very short faded sides, clean and minimal style">
+            <div class="sim-style__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
+                <path d="M6 10h12"/>
+                <path d="M6 10c0-4 3-7 6-7s6 3 6 7"/>
+                <path d="M6 10v6h12v-6"/>
+              </svg>
+            </div>
+            <span class="sim-style__name">French Crop</span>
+            <span class="sim-style__desc">Frange droite courte, minimaliste</span>
+          </button>
+
+          <button type="button" class="sim-style" data-style="mohawk-fade" data-prompt="mohawk fade hairstyle, strip of longer hair in the center of the head, sides faded to skin, edgy and bold style">
+            <div class="sim-style__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
+                <path d="M12 3v14"/>
+                <path d="M9 17h6"/>
+                <path d="M10 3c0 0-1 5-1 8s1 6 1 6"/>
+                <path d="M14 3c0 0 1 5 1 8s-1 6-1 6"/>
+              </svg>
+            </div>
+            <span class="sim-style__name">Mohawk Fade</span>
+            <span class="sim-style__desc">Cr&ecirc;te centrale, c&ocirc;t&eacute;s d&eacute;grad&eacute;s</span>
+          </button>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 3: Generate -->
+    <section class="sim-section" id="step-generate">
+      <div class="container">
+        <div class="sim-step">
+          <div class="sim-step__number">3</div>
+          <h2 class="sim-step__title">R&eacute;sultat</h2>
+        </div>
+
+        <div class="sim-generate">
+          <button type="button" class="btn btn--primary btn--generate" id="generateBtn" disabled>
+            <svg class="sim-generate__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+              <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/>
+            </svg>
+            <span>G&eacute;n&eacute;rer la simulation</span>
+          </button>
+        </div>
+
+        <!-- Loading -->
+        <div class="sim-loading" id="simLoading" hidden>
+          <div class="sim-loading__spinner"></div>
+          <p>G&eacute;n&eacute;ration en cours&hellip;</p>
+          <span>Cela peut prendre 15 &agrave; 30 secondes</span>
+        </div>
+
+        <!-- Result -->
+        <div class="sim-result" id="simResult" hidden>
+          <div class="sim-result__compare">
+            <div class="sim-result__card">
+              <span class="sim-result__label">Avant</span>
+              <img id="resultBefore" src="data:," alt="Photo originale">
+            </div>
+            <div class="sim-result__card">
+              <span class="sim-result__label">Apr&egrave;s</span>
+              <img id="resultAfter" src="data:," alt="Simulation de coiffure">
+            </div>
+          </div>
+          <div class="sim-result__actions">
+            <button type="button" class="btn btn--outline" id="retryBtn">Essayer un autre style</button>
+            <a href="index.html#contact" class="btn btn--primary">R&eacute;server ce style</a>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div class="sim-error" id="simError" hidden>
+          <p id="simErrorMsg">Une erreur est survenue.</p>
+          <button type="button" class="btn btn--outline" id="retryErrorBtn">R&eacute;essayer</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a href="index.html" class="footer__logo">Bora<span>-</span>Bora</a>
+          <p class="footer__tagline">BarberShop 4Men's &mdash; L&eacute;vis</p>
+        </div>
+        <nav class="footer__nav" aria-label="Navigation pied de page">
+          <a href="index.html#about">Le Barbershop</a>
+          <a href="index.html#services">Services</a>
+          <a href="index.html#gallery">Galerie</a>
+          <a href="simulator.html">Simulateur</a>
+          <a href="index.html#contact">Contact</a>
+        </nav>
+      </div>
+      <div class="footer__bottom">
+        <p>&copy; 2026 BORA-BORA Barbershop. Tous droits r&eacute;serv&eacute;s.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/simulator.js"></script>
+</body>
+</html>
