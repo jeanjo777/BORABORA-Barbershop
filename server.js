@@ -65,18 +65,22 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
     }
 
     const submitData = await submitRes.json();
+    console.log('Higgsfield submit response:', JSON.stringify(submitData).substring(0, 500));
     const requestId = submitData.request_id;
     const statusUrl = submitData.status_url;
 
     if (!requestId) {
       /* Direct result (some endpoints return immediately) */
-      const directUrl = submitData.images?.[0]?.url;
+      const directUrl = submitData.images?.[0]?.url || submitData.output?.images?.[0]?.url;
       if (directUrl) {
+        console.log('Direct result URL:', directUrl);
         return res.json({ result: directUrl });
       }
-      console.error('No request_id or direct result:', submitData);
+      console.error('No request_id or direct result:', JSON.stringify(submitData).substring(0, 500));
       return res.status(502).json({ error: 'Réponse inattendue du service IA.' });
     }
+
+    console.log('Polling request_id:', requestId, 'status_url:', statusUrl);
 
     /* Poll for result using status_url from response */
     const maxAttempts = 30;
@@ -97,10 +101,16 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
       const pollData = await pollRes.json();
       const status = pollData.status;
 
+      console.log('Poll attempt', i + 1, '- status:', status);
+
       if (status === 'completed') {
-        const imageUrl = pollData.images?.[0]?.url;
+        console.log('Completed response:', JSON.stringify(pollData).substring(0, 500));
+        const imageUrl = pollData.images?.[0]?.url
+          || pollData.output?.images?.[0]?.url
+          || pollData.result?.images?.[0]?.url;
 
         if (imageUrl) {
+          console.log('Image URL:', imageUrl);
           return res.json({ result: imageUrl });
         }
         console.error('Completed but no image URL:', pollData);
