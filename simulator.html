@@ -12,6 +12,50 @@
 
   <link rel="stylesheet" href="css/style.css?v=2">
   <link rel="stylesheet" href="css/simulator.css">
+  <style>
+    .sim-hero{padding:calc(var(--nav-height,72px) + 4rem) 0 2.5rem;text-align:center}
+    .sim-hero__desc{color:var(--color-text-muted,#8c8580);font-size:var(--text-lg,1.25rem);max-width:50ch;margin:0 auto}
+    .sim-section{padding:2.5rem 0 4rem}
+    .sim-step{display:flex;align-items:center;gap:1rem;margin-bottom:2.5rem}
+    .sim-step__number{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:#2ecc40;color:#0a0a0a;font-family:'Oswald',sans-serif;font-size:1.25rem;font-weight:700;border-radius:50%;flex-shrink:0}
+    .sim-step__title{font-family:'Oswald',sans-serif;font-size:clamp(1.5rem,1.2rem + 1vw,2rem);font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+    .sim-upload{position:relative;max-width:480px;margin:0 auto}
+    .sim-upload__input{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2}
+    .sim-upload__placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:4rem 1.5rem;border:2px dashed #1e1e1e;border-radius:16px;text-align:center;min-height:240px;transition:border-color .3s}
+    .sim-upload__placeholder svg{color:#2ecc40}
+    .sim-upload__placeholder p{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.06em}
+    .sim-upload__placeholder span{font-size:.8rem;color:#5c5550}
+    .sim-upload:hover .sim-upload__placeholder,.sim-upload:focus-within .sim-upload__placeholder{border-color:#2ecc40}
+    .sim-upload__preview{position:relative;max-width:320px;margin:0 auto}
+    .sim-upload__preview img{width:100%;border-radius:8px;aspect-ratio:3/4;object-fit:cover}
+    .sim-upload__change{position:absolute;bottom:12px;right:12px;padding:8px 16px;background:rgba(0,0,0,.8);color:#f2ede7;font-family:'Oswald',sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;border-radius:4px;cursor:pointer}
+    .sim-upload__change:hover{background:#2ecc40;color:#0a0a0a}
+    .sim-styles{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+    .sim-style{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:1.5rem;background:#161616;border:2px solid transparent;border-radius:8px;text-align:center;cursor:pointer;transition:all .3s cubic-bezier(.16,1,.3,1)}
+    .sim-style:hover{border-color:#1e1e1e;transform:translateY(-2px)}
+    .sim-style--selected{border-color:#2ecc40;background:rgba(46,204,64,.06)}
+    .sim-style__icon{color:#2ecc40;margin-bottom:4px}
+    .sim-style__name{font-family:'Oswald',sans-serif;font-size:.875rem;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+    .sim-style__desc{font-size:.8rem;color:#5c5550;line-height:1.4}
+    .sim-generate{text-align:center;margin-bottom:2.5rem}
+    .btn--generate{gap:.5rem;padding:16px 48px;font-size:1rem}
+    .btn--generate:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .btn--generate:disabled:hover{background-color:#2ecc40;transform:none}
+    .sim-loading{text-align:center;padding:4rem 0}
+    .sim-loading p{font-family:'Oswald',sans-serif;font-size:1.25rem;text-transform:uppercase;letter-spacing:.06em;margin-top:1.5rem}
+    .sim-loading span{font-size:.8rem;color:#5c5550}
+    .sim-loading__spinner{width:48px;height:48px;border:3px solid #1e1e1e;border-top-color:#2ecc40;border-radius:50%;margin:0 auto;animation:simSpin .8s linear infinite}
+    @keyframes simSpin{to{transform:rotate(360deg)}}
+    .sim-result__compare{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:720px;margin:0 auto 2.5rem}
+    .sim-result__card{position:relative;border-radius:8px;overflow:hidden}
+    .sim-result__card img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px}
+    .sim-result__label{position:absolute;top:12px;left:12px;padding:4px 12px;background:rgba(0,0,0,.7);color:#f2ede7;font-family:'Oswald',sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;border-radius:4px}
+    .sim-result__actions{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
+    .sim-error{text-align:center;padding:2.5rem 0}
+    .sim-error p{color:#dc5050;margin-bottom:1.5rem}
+    @media(max-width:768px){.sim-styles{grid-template-columns:repeat(2,1fr)}.sim-result__compare{grid-template-columns:1fr;max-width:360px}}
+    @media(max-width:480px){.sim-styles{grid-template-columns:1fr 1fr;gap:8px}.sim-style{padding:1rem}.sim-result__actions{flex-direction:column;align-items:stretch;padding:0 1rem}}
+  </style>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='56%25' text-anchor='middle' font-family='Oswald, sans-serif' font-size='28' font-weight='700' fill='%232ecc40'%3EBB%3C/text%3E%3C/svg%3E">
 </head>
 <body>
