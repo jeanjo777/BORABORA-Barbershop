@@ -17,6 +17,8 @@ app.use(express.static(path.join(__dirname), {
   setHeaders: function (res, filePath) {
     if (filePath.endsWith('.html')) {
       res.setHeader('Cache-Control', 'no-cache');
+    } else if (filePath.endsWith('.css') || filePath.endsWith('.js')) {
+      res.setHeader('Cache-Control', 'public, max-age=3600');
     }
   }
 }));
