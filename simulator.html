@@ -9,54 +9,409 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="css/style.css?v=2">
-  <link rel="stylesheet" href="css/simulator.css">
-  <style>
-    .sim-hero{padding:calc(var(--nav-height,72px) + 4rem) 0 2.5rem;text-align:center}
-    .sim-hero__desc{color:var(--color-text-muted,#8c8580);font-size:var(--text-lg,1.25rem);max-width:50ch;margin:0 auto}
-    .sim-section{padding:2.5rem 0 4rem}
-    .sim-step{display:flex;align-items:center;gap:1rem;margin-bottom:2.5rem}
-    .sim-step__number{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:#2ecc40;color:#0a0a0a;font-family:'Oswald',sans-serif;font-size:1.25rem;font-weight:700;border-radius:50%;flex-shrink:0}
-    .sim-step__title{font-family:'Oswald',sans-serif;font-size:clamp(1.5rem,1.2rem + 1vw,2rem);font-weight:500;text-transform:uppercase;letter-spacing:.04em}
-    .sim-upload{position:relative;max-width:480px;margin:0 auto}
-    .sim-upload__input{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2}
-    .sim-upload__placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:4rem 1.5rem;border:2px dashed #1e1e1e;border-radius:16px;text-align:center;min-height:240px;transition:border-color .3s}
-    .sim-upload__placeholder svg{color:#2ecc40}
-    .sim-upload__placeholder p{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.06em}
-    .sim-upload__placeholder span{font-size:.8rem;color:#5c5550}
-    .sim-upload:hover .sim-upload__placeholder,.sim-upload:focus-within .sim-upload__placeholder{border-color:#2ecc40}
-    .sim-upload__preview{position:relative;max-width:320px;margin:0 auto}
-    .sim-upload__preview img{width:100%;border-radius:8px;aspect-ratio:3/4;object-fit:cover}
-    .sim-upload__change{position:absolute;bottom:12px;right:12px;padding:8px 16px;background:rgba(0,0,0,.8);color:#f2ede7;font-family:'Oswald',sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;border-radius:4px;cursor:pointer}
-    .sim-upload__change:hover{background:#2ecc40;color:#0a0a0a}
-    .sim-styles{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
-    .sim-style{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:1.5rem;background:#161616;border:2px solid transparent;border-radius:8px;text-align:center;cursor:pointer;transition:all .3s cubic-bezier(.16,1,.3,1)}
-    .sim-style:hover{border-color:#1e1e1e;transform:translateY(-2px)}
-    .sim-style--selected{border-color:#2ecc40;background:rgba(46,204,64,.06)}
-    .sim-style__icon{color:#2ecc40;margin-bottom:4px}
-    .sim-style__name{font-family:'Oswald',sans-serif;font-size:.875rem;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
-    .sim-style__desc{font-size:.8rem;color:#5c5550;line-height:1.4}
-    .sim-generate{text-align:center;margin-bottom:2.5rem}
-    .btn--generate{gap:.5rem;padding:16px 48px;font-size:1rem}
-    .btn--generate:disabled{opacity:.4;cursor:not-allowed;transform:none}
-    .btn--generate:disabled:hover{background-color:#2ecc40;transform:none}
-    .sim-loading{text-align:center;padding:4rem 0}
-    .sim-loading p{font-family:'Oswald',sans-serif;font-size:1.25rem;text-transform:uppercase;letter-spacing:.06em;margin-top:1.5rem}
-    .sim-loading span{font-size:.8rem;color:#5c5550}
-    .sim-loading__spinner{width:48px;height:48px;border:3px solid #1e1e1e;border-top-color:#2ecc40;border-radius:50%;margin:0 auto;animation:simSpin .8s linear infinite}
-    @keyframes simSpin{to{transform:rotate(360deg)}}
-    .sim-result__compare{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:720px;margin:0 auto 2.5rem}
-    .sim-result__card{position:relative;border-radius:8px;overflow:hidden}
-    .sim-result__card img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px}
-    .sim-result__label{position:absolute;top:12px;left:12px;padding:4px 12px;background:rgba(0,0,0,.7);color:#f2ede7;font-family:'Oswald',sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;border-radius:4px}
-    .sim-result__actions{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
-    .sim-error{text-align:center;padding:2.5rem 0}
-    .sim-error p{color:#dc5050;margin-bottom:1.5rem}
-    @media(max-width:768px){.sim-styles{grid-template-columns:repeat(2,1fr)}.sim-result__compare{grid-template-columns:1fr;max-width:360px}}
-    @media(max-width:480px){.sim-styles{grid-template-columns:1fr 1fr;gap:8px}.sim-style{padding:1rem}.sim-result__actions{flex-direction:column;align-items:stretch;padding:0 1rem}}
-  </style>
+  <link rel="stylesheet" href="css/style.css?v=3">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='56%25' text-anchor='middle' font-family='Oswald, sans-serif' font-size='28' font-weight='700' fill='%232ecc40'%3EBB%3C/text%3E%3C/svg%3E">
+
+  <style>
+    /* ---- Simulator Layout ---- */
+    .sim-page { padding: calc(72px + 2rem) 0 3rem; }
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      align-items: start;
+    }
+
+    /* ---- Panels ---- */
+    .sim-panel {
+      background: #111;
+      border: 1px solid #1e1e1e;
+      border-radius: 12px;
+      padding: 2rem;
+    }
+    .sim-panel__header {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #1e1e1e;
+    }
+    .sim-panel__title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #f2ede7;
+    }
+    .sim-panel__subtitle {
+      font-size: .85rem;
+      color: #8c8580;
+      margin-top: .35rem;
+      line-height: 1.5;
+    }
+
+    /* ---- Upload Area ---- */
+    .sim-upload-zone {
+      position: relative;
+      border: 2px dashed #2a2a2a;
+      border-radius: 10px;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      transition: border-color .3s, background .3s;
+      margin-bottom: 1.5rem;
+      cursor: pointer;
+    }
+    .sim-upload-zone:hover,
+    .sim-upload-zone.drag-over {
+      border-color: #2ecc40;
+      background: rgba(46,204,64,.03);
+    }
+    .sim-upload-zone__input {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .sim-upload-zone__icon {
+      width: 48px; height: 48px;
+      color: #2ecc40;
+      margin: 0 auto .75rem;
+    }
+    .sim-upload-zone__text {
+      font-family: 'Oswald', sans-serif;
+      font-size: .95rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: #f2ede7;
+      margin-bottom: .25rem;
+    }
+    .sim-upload-zone__hint {
+      font-size: .78rem;
+      color: #5c5550;
+    }
+
+    /* Upload buttons */
+    .sim-upload-actions {
+      display: flex;
+      gap: .75rem;
+      margin-bottom: 1.5rem;
+    }
+    .sim-upload-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      padding: 12px 16px;
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      color: #f2ede7;
+      font-family: 'Oswald', sans-serif;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .sim-upload-btn:hover {
+      border-color: #2ecc40;
+      background: rgba(46,204,64,.05);
+    }
+    .sim-upload-btn svg { width: 18px; height: 18px; color: #2ecc40; flex-shrink: 0; }
+
+    /* Preview in upload zone */
+    .sim-preview-inline {
+      position: relative;
+      max-width: 260px;
+      margin: 0 auto;
+    }
+    .sim-preview-inline img {
+      width: 100%;
+      border-radius: 8px;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+    }
+    .sim-preview-inline__change {
+      position: absolute;
+      bottom: 10px; right: 10px;
+      padding: 6px 14px;
+      background: rgba(0,0,0,.85);
+      color: #f2ede7;
+      font-family: 'Oswald', sans-serif;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .sim-preview-inline__change:hover {
+      background: #2ecc40;
+      color: #0a0a0a;
+    }
+
+    /* ---- Section Label ---- */
+    .sim-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: .8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #2ecc40;
+      margin-bottom: .75rem;
+    }
+
+    /* ---- Style List ---- */
+    .sim-style-list {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    .sim-style-item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: 12px 14px;
+      background: #161616;
+      border: 1.5px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .25s;
+      text-align: left;
+    }
+    .sim-style-item:hover {
+      border-color: #2a2a2a;
+      background: #1a1a1a;
+    }
+    .sim-style-item--selected {
+      border-color: #2ecc40;
+      background: rgba(46,204,64,.05);
+    }
+    .sim-style-item__radio {
+      width: 18px; height: 18px;
+      border: 2px solid #3a3a3a;
+      border-radius: 50%;
+      flex-shrink: 0;
+      position: relative;
+      transition: border-color .2s;
+    }
+    .sim-style-item--selected .sim-style-item__radio {
+      border-color: #2ecc40;
+    }
+    .sim-style-item--selected .sim-style-item__radio::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 8px; height: 8px;
+      background: #2ecc40;
+      border-radius: 50%;
+    }
+    .sim-style-item__info { flex: 1; min-width: 0; }
+    .sim-style-item__name {
+      font-family: 'Oswald', sans-serif;
+      font-size: .9rem;
+      font-weight: 500;
+      letter-spacing: .03em;
+      color: #f2ede7;
+    }
+    .sim-style-item__desc {
+      font-size: .75rem;
+      color: #5c5550;
+      margin-top: 2px;
+    }
+
+    /* ---- Generate Button ---- */
+    .sim-generate-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      padding: 14px 24px;
+      margin-top: 1.5rem;
+      background: #2ecc40;
+      color: #0a0a0a;
+      font-family: 'Oswald', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .2s, transform .2s, opacity .2s;
+    }
+    .sim-generate-btn:hover { background: #5ddf6a; transform: translateY(-1px); }
+    .sim-generate-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .sim-generate-btn:disabled:hover { background: #2ecc40; transform: none; }
+    .sim-generate-btn svg { width: 18px; height: 18px; }
+
+    /* ---- Right Panel: Preview ---- */
+    .sim-preview-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 380px;
+      border: 2px dashed #1e1e1e;
+      border-radius: 10px;
+      padding: 2rem;
+      text-align: center;
+      color: #5c5550;
+      font-size: .85rem;
+    }
+    .sim-preview-area svg {
+      width: 56px; height: 56px;
+      color: #2a2a2a;
+      margin-bottom: 1rem;
+    }
+    .sim-preview-area p { max-width: 28ch; }
+
+    /* ---- Loading ---- */
+    .sim-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 380px;
+      padding: 2rem;
+      text-align: center;
+    }
+    .sim-spinner {
+      width: 48px; height: 48px;
+      border: 3px solid #1e1e1e;
+      border-top-color: #2ecc40;
+      border-radius: 50%;
+      animation: simSpin .8s linear infinite;
+    }
+    @keyframes simSpin { to { transform: rotate(360deg); } }
+    .sim-loading__text {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-top: 1.25rem;
+      color: #f2ede7;
+    }
+    .sim-loading__hint {
+      font-size: .78rem;
+      color: #5c5550;
+      margin-top: .35rem;
+    }
+
+    /* ---- Result ---- */
+    .sim-result-display {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .sim-result-card {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .sim-result-card img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .sim-result-badge {
+      position: absolute;
+      top: 10px; left: 10px;
+      padding: 4px 12px;
+      background: rgba(0,0,0,.75);
+      color: #f2ede7;
+      font-family: 'Oswald', sans-serif;
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      border-radius: 4px;
+    }
+    .sim-result-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+    }
+    .sim-result-actions {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+    }
+    .sim-result-actions .btn { flex: 1; min-width: 140px; text-align: center; }
+
+    /* ---- Error ---- */
+    .sim-error-box {
+      text-align: center;
+      padding: 2rem;
+    }
+    .sim-error-box p {
+      color: #dc5050;
+      margin-bottom: 1rem;
+      font-size: .9rem;
+    }
+
+    /* ---- Important Box ---- */
+    .sim-info {
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: rgba(46,204,64,.04);
+      border: 1px solid rgba(46,204,64,.15);
+      border-radius: 8px;
+    }
+    .sim-info__title {
+      font-family: 'Oswald', sans-serif;
+      font-size: .8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #2ecc40;
+      margin-bottom: .5rem;
+    }
+    .sim-info__list {
+      font-size: .78rem;
+      color: #8c8580;
+      line-height: 1.6;
+    }
+    .sim-info__list li {
+      list-style: none;
+      padding-left: 1rem;
+      position: relative;
+    }
+    .sim-info__list li::before {
+      content: '';
+      position: absolute;
+      left: 0; top: .55em;
+      width: 5px; height: 5px;
+      background: #2ecc40;
+      border-radius: 50%;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 768px) {
+      .sim-grid {
+        grid-template-columns: 1fr;
+      }
+      .sim-result-compare {
+        grid-template-columns: 1fr;
+        max-width: 320px;
+        margin: 0 auto;
+      }
+    }
+    @media (max-width: 480px) {
+      .sim-panel { padding: 1.25rem; }
+      .sim-upload-actions { flex-direction: column; }
+      .sim-result-actions { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
 
@@ -66,7 +421,7 @@
   <nav class="nav nav--scrolled" id="nav">
     <div class="nav__container">
       <a href="index.html" class="nav__logo">Bora<span>-</span>Bora</a>
-      <button class="nav__toggle" id="navToggle" aria-label="Ouvrir le menu" aria-expanded="false">
+      <button class="nav__toggle" id="navToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
         <span></span>
         <span></span>
         <span></span>
@@ -82,196 +437,199 @@
   </nav>
 
   <main id="main">
+    <section class="sim-page">
 
-    <!-- Simulator Hero -->
-    <section class="sim-hero">
-      <div class="container">
+      <!-- Header -->
+      <div style="text-align:center;padding:0 1.5rem 2rem;">
         <p class="section-label">Intelligence Artificielle</p>
         <h1 class="section-title">Simulateur de<br><em>Coiffure</em></h1>
-        <p class="sim-hero__desc">Uploadez votre photo, choisissez un style et visualisez le r&eacute;sultat avant de r&eacute;server.</p>
       </div>
-    </section>
 
-    <!-- Step 1: Upload -->
-    <section class="sim-section" id="step-upload">
-      <div class="container">
-        <div class="sim-step">
-          <div class="sim-step__number">1</div>
-          <h2 class="sim-step__title">Votre Photo</h2>
-        </div>
-        <div class="sim-upload" id="uploadZone">
-          <input type="file" id="photoInput" accept="image/*" capture="user" class="sim-upload__input" aria-label="Choisir une photo">
-          <div class="sim-upload__placeholder" id="uploadPlaceholder">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
-              <path d="M12 16V8m0 0l-3 3m3-3l3 3"/>
-              <path d="M3 16.5V18a3 3 0 003 3h12a3 3 0 003-3v-1.5"/>
-              <circle cx="12" cy="4" r="1"/>
-            </svg>
-            <p>Cliquez ou glissez votre photo ici</p>
-            <span>JPG, PNG &mdash; Photo de face recommand&eacute;e</span>
+      <div class="sim-grid">
+
+        <!-- ===== LEFT PANEL: Setup ===== -->
+        <div class="sim-panel">
+          <div class="sim-panel__header">
+            <h2 class="sim-panel__title">Pr&eacute;parez votre simulation</h2>
+            <p class="sim-panel__subtitle">Envoyez une photo nette, de face, sans filtre. Puis choisissez la coiffure d&eacute;sir&eacute;e.</p>
           </div>
-          <div class="sim-upload__preview" id="uploadPreview" hidden>
-            <img id="previewImg" src="data:," alt="Votre photo">
-            <button type="button" class="sim-upload__change" id="changePhoto">Changer</button>
+
+          <!-- Upload zone -->
+          <div class="sim-upload-zone" id="uploadZone">
+            <input type="file" id="photoInput" accept="image/*" class="sim-upload-zone__input" aria-label="Choisir une photo">
+            <div id="uploadPlaceholder">
+              <svg class="sim-upload-zone__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 16V8m0 0l-3 3m3-3l3 3"/>
+                <path d="M3 16.5V18a3 3 0 003 3h12a3 3 0 003-3v-1.5"/>
+              </svg>
+              <p class="sim-upload-zone__text">Cliquez ou glissez votre photo</p>
+              <span class="sim-upload-zone__hint">JPG, PNG &mdash; Max 10 Mo</span>
+            </div>
+            <div class="sim-preview-inline" id="uploadPreview" hidden>
+              <img id="previewImg" src="data:," alt="Votre photo">
+              <button type="button" class="sim-preview-inline__change" id="changePhoto">Changer</button>
+            </div>
           </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- Step 2: Choose Style -->
-    <section class="sim-section" id="step-style">
-      <div class="container">
-        <div class="sim-step">
-          <div class="sim-step__number">2</div>
-          <h2 class="sim-step__title">Choisissez un Style</h2>
-        </div>
-        <div class="sim-styles" id="styleGrid">
-
-          <button type="button" class="sim-style" data-style="classic-fade" data-prompt="classic fade haircut, short sides gradually blending into longer hair on top, clean and professional look">
-            <div class="sim-style__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
-                <path d="M5 3C5 3 5 13 12 13C19 13 19 3 19 3"/>
-                <line x1="12" y1="13" x2="12" y2="21"/>
+          <!-- Upload buttons -->
+          <div class="sim-upload-actions">
+            <button type="button" class="sim-upload-btn" id="btnCamera">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
               </svg>
-            </div>
-            <span class="sim-style__name">Fade Classique</span>
-            <span class="sim-style__desc">D&eacute;grad&eacute; progressif, propre et polyvalent</span>
-          </button>
-
-          <button type="button" class="sim-style" data-style="buzz-cut" data-prompt="buzz cut, very short uniform length all over, military style clean cut">
-            <div class="sim-style__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
-                <circle cx="12" cy="10" r="7"/>
-                <line x1="12" y1="17" x2="12" y2="21"/>
+              Ouvrir la cam&eacute;ra
+            </button>
+            <button type="button" class="sim-upload-btn" id="btnFile">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
-            </div>
-            <span class="sim-style__name">Buzz Cut</span>
-            <span class="sim-style__desc">Court uniforme, style net et masculin</span>
-          </button>
+              Ajouter une image
+            </button>
+          </div>
 
-          <button type="button" class="sim-style" data-style="pompadour" data-prompt="modern pompadour hairstyle, volume on top swept back, faded sides, stylish and bold">
-            <div class="sim-style__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
-                <path d="M6 18c0-5 2-12 6-14 4 2 6 9 6 14"/>
-                <path d="M8 18h8"/>
-              </svg>
-            </div>
-            <span class="sim-style__name">Pompadour</span>
-            <span class="sim-style__desc">Volume sur le dessus, c&ocirc;t&eacute;s d&eacute;grad&eacute;s</span>
-          </button>
+          <!-- Style selection -->
+          <p class="sim-label">Choisissez une coiffure</p>
+          <div class="sim-style-list" id="styleList">
 
-          <button type="button" class="sim-style" data-style="textured-crop" data-prompt="textured crop haircut, short textured fringe on top, tapered sides, modern European style">
-            <div class="sim-style__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
-                <path d="M4 12h4m4 0h4m-4-4h4m-8 8h4"/>
-                <rect x="3" y="6" width="18" height="12" rx="2"/>
-              </svg>
-            </div>
-            <span class="sim-style__name">Textured Crop</span>
-            <span class="sim-style__desc">Frange textur&eacute;e, style europ&eacute;en moderne</span>
-          </button>
+            <button type="button" class="sim-style-item" data-style="classic-fade" data-prompt="classic fade haircut, short sides gradually blending into longer hair on top, clean and professional look">
+              <div class="sim-style-item__radio"></div>
+              <div class="sim-style-item__info">
+                <div class="sim-style-item__name">Fade Classique</div>
+                <div class="sim-style-item__desc">D&eacute;grad&eacute; progressif, propre et polyvalent</div>
+              </div>
+            </button>
 
-          <button type="button" class="sim-style" data-style="undercut" data-prompt="undercut hairstyle, disconnected sides shaved very short, long hair on top slicked back or to the side">
-            <div class="sim-style__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
-                <path d="M4 16h16"/>
-                <path d="M6 16V8c0-3 2-5 6-5s6 2 6 5v8"/>
-              </svg>
-            </div>
-            <span class="sim-style__name">Undercut</span>
-            <span class="sim-style__desc">C&ocirc;t&eacute;s ras&eacute;s, dessus long et libre</span>
-          </button>
+            <button type="button" class="sim-style-item" data-style="buzz-cut" data-prompt="buzz cut, very short uniform length all over, military style clean cut">
+              <div class="sim-style-item__radio"></div>
+              <div class="sim-style-item__info">
+                <div class="sim-style-item__name">Buzz Cut</div>
+                <div class="sim-style-item__desc">Court uniforme, style net et masculin</div>
+              </div>
+            </button>
 
-          <button type="button" class="sim-style" data-style="slick-back" data-prompt="slick back hairstyle, hair combed smoothly backwards, medium length, clean sides, elegant and refined look">
-            <div class="sim-style__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
-                <path d="M5 12c0-5 3-9 7-9s7 4 7 9"/>
-                <path d="M8 12l4-3 4 3"/>
-              </svg>
-            </div>
-            <span class="sim-style__name">Slick Back</span>
-            <span class="sim-style__desc">Peign&eacute; vers l'arri&egrave;re, &eacute;l&eacute;gant</span>
-          </button>
+            <button type="button" class="sim-style-item" data-style="pompadour" data-prompt="modern pompadour hairstyle, volume on top swept back, faded sides, stylish and bold">
+              <div class="sim-style-item__radio"></div>
+              <div class="sim-style-item__info">
+                <div class="sim-style-item__name">Pompadour</div>
+                <div class="sim-style-item__desc">Volume sur le dessus, c&ocirc;t&eacute;s d&eacute;grad&eacute;s</div>
+              </div>
+            </button>
 
-          <button type="button" class="sim-style" data-style="french-crop" data-prompt="french crop haircut, short straight fringe, very short faded sides, clean and minimal style">
-            <div class="sim-style__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
-                <path d="M6 10h12"/>
-                <path d="M6 10c0-4 3-7 6-7s6 3 6 7"/>
-                <path d="M6 10v6h12v-6"/>
-              </svg>
-            </div>
-            <span class="sim-style__name">French Crop</span>
-            <span class="sim-style__desc">Frange droite courte, minimaliste</span>
-          </button>
+            <button type="button" class="sim-style-item" data-style="textured-crop" data-prompt="textured crop haircut, short textured fringe on top, tapered sides, modern European style">
+              <div class="sim-style-item__radio"></div>
+              <div class="sim-style-item__info">
+                <div class="sim-style-item__name">Textured Crop</div>
+                <div class="sim-style-item__desc">Frange textur&eacute;e, style europ&eacute;en moderne</div>
+              </div>
+            </button>
 
-          <button type="button" class="sim-style" data-style="mohawk-fade" data-prompt="mohawk fade hairstyle, strip of longer hair in the center of the head, sides faded to skin, edgy and bold style">
-            <div class="sim-style__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
-                <path d="M12 3v14"/>
-                <path d="M9 17h6"/>
-                <path d="M10 3c0 0-1 5-1 8s1 6 1 6"/>
-                <path d="M14 3c0 0 1 5 1 8s-1 6-1 6"/>
-              </svg>
-            </div>
-            <span class="sim-style__name">Mohawk Fade</span>
-            <span class="sim-style__desc">Cr&ecirc;te centrale, c&ocirc;t&eacute;s d&eacute;grad&eacute;s</span>
-          </button>
+            <button type="button" class="sim-style-item" data-style="undercut" data-prompt="undercut hairstyle, disconnected sides shaved very short, long hair on top slicked back or to the side">
+              <div class="sim-style-item__radio"></div>
+              <div class="sim-style-item__info">
+                <div class="sim-style-item__name">Undercut</div>
+                <div class="sim-style-item__desc">C&ocirc;t&eacute;s ras&eacute;s, dessus long et libre</div>
+              </div>
+            </button>
 
-        </div>
-      </div>
-    </section>
+            <button type="button" class="sim-style-item" data-style="slick-back" data-prompt="slick back hairstyle, hair combed smoothly backwards, medium length, clean sides, elegant and refined look">
+              <div class="sim-style-item__radio"></div>
+              <div class="sim-style-item__info">
+                <div class="sim-style-item__name">Slick Back</div>
+                <div class="sim-style-item__desc">Peign&eacute; vers l'arri&egrave;re, &eacute;l&eacute;gant</div>
+              </div>
+            </button>
 
-    <!-- Step 3: Generate -->
-    <section class="sim-section" id="step-generate">
-      <div class="container">
-        <div class="sim-step">
-          <div class="sim-step__number">3</div>
-          <h2 class="sim-step__title">R&eacute;sultat</h2>
-        </div>
+            <button type="button" class="sim-style-item" data-style="french-crop" data-prompt="french crop haircut, short straight fringe, very short faded sides, clean and minimal style">
+              <div class="sim-style-item__radio"></div>
+              <div class="sim-style-item__info">
+                <div class="sim-style-item__name">French Crop</div>
+                <div class="sim-style-item__desc">Frange droite courte, minimaliste</div>
+              </div>
+            </button>
 
-        <div class="sim-generate">
-          <button type="button" class="btn btn--primary btn--generate" id="generateBtn" disabled>
-            <svg class="sim-generate__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <button type="button" class="sim-style-item" data-style="mohawk-fade" data-prompt="mohawk fade hairstyle, strip of longer hair in the center of the head, sides faded to skin, edgy and bold style">
+              <div class="sim-style-item__radio"></div>
+              <div class="sim-style-item__info">
+                <div class="sim-style-item__name">Mohawk Fade</div>
+                <div class="sim-style-item__desc">Cr&ecirc;te centrale, c&ocirc;t&eacute;s d&eacute;grad&eacute;s</div>
+              </div>
+            </button>
+
+          </div>
+
+          <!-- Generate -->
+          <button type="button" class="sim-generate-btn" id="generateBtn" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/>
             </svg>
-            <span>G&eacute;n&eacute;rer la simulation</span>
+            G&eacute;n&eacute;rer la simulation
           </button>
         </div>
 
-        <!-- Loading -->
-        <div class="sim-loading" id="simLoading" hidden>
-          <div class="sim-loading__spinner"></div>
-          <p>G&eacute;n&eacute;ration en cours&hellip;</p>
-          <span>Cela peut prendre 15 &agrave; 30 secondes</span>
-        </div>
+        <!-- ===== RIGHT PANEL: Preview ===== -->
+        <div class="sim-panel">
+          <div class="sim-panel__header">
+            <h2 class="sim-panel__title">Votre aper&ccedil;u coiffure</h2>
+          </div>
 
-        <!-- Result -->
-        <div class="sim-result" id="simResult" hidden>
-          <div class="sim-result__compare">
-            <div class="sim-result__card">
-              <span class="sim-result__label">Avant</span>
-              <img id="resultBefore" src="data:," alt="Photo originale">
+          <!-- Empty state -->
+          <div class="sim-preview-area" id="previewEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+              <rect x="3" y="3" width="18" height="18" rx="3"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="M21 15l-5-5L5 21"/>
+            </svg>
+            <p>Aucun rendu pour l'instant</p>
+            <span style="font-size:.75rem;color:#3a3a3a;margin-top:.5rem;">Un aper&ccedil;u sera g&eacute;n&eacute;r&eacute; pour le look choisi.</span>
+          </div>
+
+          <!-- Loading -->
+          <div class="sim-loading" id="simLoading" hidden>
+            <div class="sim-spinner"></div>
+            <p class="sim-loading__text">G&eacute;n&eacute;ration en cours&hellip;</p>
+            <span class="sim-loading__hint">Cela peut prendre 15 &agrave; 30 secondes</span>
+          </div>
+
+          <!-- Result -->
+          <div class="sim-result-display" id="simResult" hidden>
+            <div class="sim-result-compare">
+              <div class="sim-result-card">
+                <span class="sim-result-badge">Avant</span>
+                <img id="resultBefore" src="data:," alt="Photo originale">
+              </div>
+              <div class="sim-result-card">
+                <span class="sim-result-badge">Apr&egrave;s</span>
+                <img id="resultAfter" src="data:," alt="Simulation de coiffure">
+              </div>
             </div>
-            <div class="sim-result__card">
-              <span class="sim-result__label">Apr&egrave;s</span>
-              <img id="resultAfter" src="data:," alt="Simulation de coiffure">
+            <div class="sim-result-actions">
+              <button type="button" class="btn btn--outline" id="retryBtn">Essayer un autre style</button>
+              <a href="index.html#contact" class="btn btn--primary">R&eacute;server ce style</a>
             </div>
           </div>
-          <div class="sim-result__actions">
-            <button type="button" class="btn btn--outline" id="retryBtn">Essayer un autre style</button>
-            <a href="index.html#contact" class="btn btn--primary">R&eacute;server ce style</a>
+
+          <!-- Error -->
+          <div class="sim-error-box" id="simError" hidden>
+            <p id="simErrorMsg">Une erreur est survenue.</p>
+            <button type="button" class="btn btn--outline" id="retryErrorBtn">R&eacute;essayer</button>
+          </div>
+
+          <!-- Important -->
+          <div class="sim-info">
+            <p class="sim-info__title">Important</p>
+            <ul class="sim-info__list">
+              <li>L'aper&ccedil;u g&eacute;n&eacute;r&eacute; est une simulation IA, le r&eacute;sultat final d&eacute;pend de la texture et du volume de vos cheveux.</li>
+              <li>La g&eacute;n&eacute;ration peut prendre 15 &agrave; 30 secondes.</li>
+              <li>Utilisez une photo de face, nette, sans filtre pour un meilleur r&eacute;sultat.</li>
+            </ul>
           </div>
         </div>
 
-        <!-- Error -->
-        <div class="sim-error" id="simError" hidden>
-          <p id="simErrorMsg">Une erreur est survenue.</p>
-          <button type="button" class="btn btn--outline" id="retryErrorBtn">R&eacute;essayer</button>
-        </div>
       </div>
     </section>
-
   </main>
 
   <!-- Footer -->

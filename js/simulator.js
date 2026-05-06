@@ -7,12 +7,16 @@
 
   /* --- Elements --- */
   var photoInput = document.getElementById('photoInput');
+  var uploadZone = document.getElementById('uploadZone');
   var uploadPlaceholder = document.getElementById('uploadPlaceholder');
   var uploadPreview = document.getElementById('uploadPreview');
   var previewImg = document.getElementById('previewImg');
   var changePhoto = document.getElementById('changePhoto');
-  var styleGrid = document.getElementById('styleGrid');
+  var btnCamera = document.getElementById('btnCamera');
+  var btnFile = document.getElementById('btnFile');
+  var styleList = document.getElementById('styleList');
   var generateBtn = document.getElementById('generateBtn');
+  var previewEmpty = document.getElementById('previewEmpty');
   var simLoading = document.getElementById('simLoading');
   var simResult = document.getElementById('simResult');
   var simError = document.getElementById('simError');
@@ -49,8 +53,7 @@
   });
 
   /* --- Photo upload --- */
-  photoInput.addEventListener('change', function (e) {
-    var file = e.target.files[0];
+  function handleFile(file) {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
@@ -73,9 +76,14 @@
       updateGenerateBtn();
     };
     reader.readAsDataURL(file);
+  }
+
+  photoInput.addEventListener('change', function (e) {
+    handleFile(e.target.files[0]);
   });
 
-  changePhoto.addEventListener('click', function () {
+  changePhoto.addEventListener('click', function (e) {
+    e.stopPropagation();
     selectedFile = null;
     previewImg.src = 'data:,';
     uploadPreview.hidden = true;
@@ -85,37 +93,44 @@
     updateGenerateBtn();
   });
 
-  /* --- Drag and drop --- */
-  var uploadZone = document.getElementById('uploadZone');
+  /* --- Camera button --- */
+  btnCamera.addEventListener('click', function () {
+    photoInput.setAttribute('capture', 'user');
+    photoInput.click();
+  });
 
+  /* --- File button --- */
+  btnFile.addEventListener('click', function () {
+    photoInput.removeAttribute('capture');
+    photoInput.click();
+  });
+
+  /* --- Drag and drop --- */
   uploadZone.addEventListener('dragover', function (e) {
     e.preventDefault();
-    uploadPlaceholder.style.borderColor = 'var(--color-accent)';
+    uploadZone.classList.add('drag-over');
   });
 
   uploadZone.addEventListener('dragleave', function () {
-    uploadPlaceholder.style.borderColor = '';
+    uploadZone.classList.remove('drag-over');
   });
 
   uploadZone.addEventListener('drop', function (e) {
     e.preventDefault();
-    uploadPlaceholder.style.borderColor = '';
+    uploadZone.classList.remove('drag-over');
     var file = e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) {
-      var dt = new DataTransfer();
-      dt.items.add(file);
-      photoInput.files = dt.files;
-      photoInput.dispatchEvent(new Event('change'));
+      handleFile(file);
     }
   });
 
   /* --- Style selection --- */
-  var styleButtons = styleGrid.querySelectorAll('.sim-style');
+  var styleItems = styleList.querySelectorAll('.sim-style-item');
 
-  styleButtons.forEach(function (btn) {
+  styleItems.forEach(function (btn) {
     btn.addEventListener('click', function () {
-      styleButtons.forEach(function (b) { b.classList.remove('sim-style--selected'); });
-      btn.classList.add('sim-style--selected');
+      styleItems.forEach(function (b) { b.classList.remove('sim-style-item--selected'); });
+      btn.classList.add('sim-style-item--selected');
       selectedStyle = btn.getAttribute('data-style');
       selectedPrompt = btn.getAttribute('data-prompt');
       updateGenerateBtn();
@@ -129,6 +144,7 @@
 
   /* --- Show/hide sections --- */
   function showLoading() {
+    previewEmpty.hidden = true;
     simLoading.hidden = false;
     simResult.hidden = true;
     simError.hidden = true;
@@ -138,6 +154,7 @@
   function showResult(beforeSrc, afterSrc) {
     resultBefore.src = beforeSrc;
     resultAfter.src = afterSrc;
+    previewEmpty.hidden = true;
     simLoading.hidden = true;
     simResult.hidden = false;
     simError.hidden = true;
@@ -146,6 +163,7 @@
 
   function showError(message) {
     simErrorMsg.textContent = message || 'Une erreur est survenue. Veuillez réessayer.';
+    previewEmpty.hidden = true;
     simLoading.hidden = true;
     simResult.hidden = true;
     simError.hidden = false;
@@ -190,16 +208,18 @@
   /* --- Retry --- */
   retryBtn.addEventListener('click', function () {
     simResult.hidden = true;
+    previewEmpty.hidden = false;
     generateBtn.disabled = false;
-    styleButtons.forEach(function (b) { b.classList.remove('sim-style--selected'); });
+    styleItems.forEach(function (b) { b.classList.remove('sim-style-item--selected'); });
     selectedStyle = null;
     selectedPrompt = '';
     updateGenerateBtn();
-    document.getElementById('step-style').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    styleList.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
   retryErrorBtn.addEventListener('click', function () {
     simError.hidden = true;
+    previewEmpty.hidden = false;
     generateBtn.disabled = false;
   });
 
