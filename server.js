@@ -44,18 +44,19 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
     const base64Image = 'data:' + req.file.mimetype + ';base64,' + req.file.buffer.toString('base64');
 
     /* Call Higgsfield API — Flux Kontext image editing */
-    const submitRes = await fetch('https://api.higgsfield.ai/api/v1/flux-pro/kontext/max/text-to-image', {
+    const submitRes = await fetch('https://platform.higgsfield.ai/flux-pro/kontext/max/text-to-image', {
       method: 'POST',
       headers: {
         'Authorization': 'Key ' + keyId + ':' + keySecret,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        prompt: fullPrompt,
-        image_url: base64Image,
-        width: 768,
-        height: 1024,
-        num_images: 1
+        input: {
+          prompt: fullPrompt,
+          image_url: base64Image,
+          aspect_ratio: '3:4',
+          safety_tolerance: 2
+        }
       })
     });
 
@@ -66,26 +67,28 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
     }
 
     const submitData = await submitRes.json();
-    const taskId = submitData.id || submitData.task_id;
+    const requestId = submitData.request_id;
+    const statusUrl = submitData.status_url;
 
-    if (!taskId) {
+    if (!requestId) {
       /* Direct result (some endpoints return immediately) */
-      const directUrl = submitData.images?.[0]?.url || submitData.output?.url || submitData.url;
+      const directUrl = submitData.images?.[0]?.url;
       if (directUrl) {
         return res.json({ result: directUrl });
       }
-      console.error('No task ID or direct result:', submitData);
+      console.error('No request_id or direct result:', submitData);
       return res.status(502).json({ error: 'Réponse inattendue du service IA.' });
     }
 
-    /* Poll for result */
+    /* Poll for result using status_url from response */
     const maxAttempts = 30;
     const pollInterval = 3000;
+    const pollUrl = statusUrl || ('https://platform.higgsfield.ai/requests/' + requestId + '/status');
 
     for (let i = 0; i < maxAttempts; i++) {
       await new Promise(function (resolve) { setTimeout(resolve, pollInterval); });
 
-      const pollRes = await fetch('https://api.higgsfield.ai/api/v1/tasks/' + taskId, {
+      const pollRes = await fetch(pollUrl, {
         headers: {
           'Authorization': 'Key ' + keyId + ':' + keySecret
         }
@@ -94,14 +97,10 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
       if (!pollRes.ok) continue;
 
       const pollData = await pollRes.json();
-      const status = pollData.status || pollData.state;
+      const status = pollData.status;
 
-      if (status === 'completed' || status === 'succeeded' || status === 'done') {
-        const imageUrl = pollData.images?.[0]?.url
-          || pollData.output?.images?.[0]?.url
-          || pollData.output?.url
-          || pollData.result?.url
-          || pollData.url;
+      if (status === 'completed') {
+        const imageUrl = pollData.images?.[0]?.url;
 
         if (imageUrl) {
           return res.json({ result: imageUrl });
@@ -113,6 +112,10 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
       if (status === 'failed' || status === 'error') {
         console.error('Generation failed:', pollData);
         return res.status(502).json({ error: 'La génération a échoué. Essayez une autre photo.' });
+      }
+
+      if (status === 'nsfw') {
+        return res.status(400).json({ error: 'Photo rejetée par le filtre de sécurité. Essayez une autre photo.' });
       }
     }
 
