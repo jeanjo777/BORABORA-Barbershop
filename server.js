@@ -2,15 +2,28 @@ const express = require('express');
 const path = require('path');
 const multer = require('multer');
 const sharp = require('sharp');
+const RunwayML = require('@runwayml/sdk');
 const { fal } = require('@fal-ai/client');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-/* --- Configure fal.ai client --- */
+/* --- Configure fal.ai (used only for image hosting) --- */
 var falKey = process.env.FAL_KEY || '';
 if (falKey) {
   fal.config({ credentials: falKey });
+}
+
+/* --- Runway client (initialized on first use) --- */
+var runwayClient = null;
+
+function getRunwayClient() {
+  if (!runwayClient) {
+    var apiKey = process.env.RUNWAY_API_KEY;
+    if (!apiKey) throw new Error('RUNWAY_API_KEY non configurée.');
+    runwayClient = new RunwayML({ apiKey: apiKey });
+  }
+  return runwayClient;
 }
 
 /* --- Multer for photo uploads (memory, max 10MB) --- */
@@ -31,73 +44,56 @@ app.use(express.static(path.join(__dirname), {
   }
 }));
 
-/* --- Compress image for API (max 1200px, JPEG quality 80) --- */
-async function compressImage(buffer) {
-  var image = sharp(buffer);
-  var metadata = await image.metadata();
-
-  var pipeline = image;
-  var maxDim = 1200;
-
-  if (metadata.width > maxDim || metadata.height > maxDim) {
-    pipeline = pipeline.resize(maxDim, maxDim, { fit: 'inside', withoutEnlargement: true });
-  }
-
-  var compressed = await pipeline.jpeg({ quality: 80 }).toBuffer();
-  return 'data:image/jpeg;base64,' + compressed.toString('base64');
-}
-
 /* --- Simulate hairstyle API --- */
 app.post('/api/simulate', upload.single('photo'), async function (req, res) {
   try {
-    if (!falKey) {
-      return res.status(500).json({ error: 'API non configurée. Contactez le barbershop.' });
-    }
+    var client = getRunwayClient();
 
     if (!req.file) {
       return res.status(400).json({ error: 'Aucune photo reçue.' });
     }
 
     var stylePrompt = req.body.prompt || 'modern fade haircut';
-    var prompt = 'Change ONLY the hairstyle to ' + stylePrompt + '. Keep the exact same person, same face, same eyes, same skin tone, same background, same clothing. Only modify the hair. Photorealistic result.';
+    var promptText = 'This is a photo of @photo. Change ONLY the hairstyle to ' + stylePrompt + '. The person must be IDENTICAL to @photo — same face, same eyes, same skin tone, same background, same clothing. Only the hair changes. Photorealistic, natural lighting.';
 
-    /* Compress image */
-    var base64Image = await compressImage(req.file.buffer);
-    console.log('Image compressed:', Math.round(base64Image.length / 1024), 'KB');
-
-    /* Upload image to fal storage for reliable processing */
+    /* Compress and upload image to get HTTPS URL (Runway requires HTTPS, not data URI) */
     var jpegBuffer = await sharp(req.file.buffer)
       .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
       .jpeg({ quality: 80 })
       .toBuffer();
+
     var imageFile = new File([jpegBuffer], 'photo.jpg', { type: 'image/jpeg' });
-    var uploadedUrl = await fal.storage.upload(imageFile);
-    console.log('Image uploaded to fal storage:', uploadedUrl);
+    var imageUrl = await fal.storage.upload(imageFile);
+    console.log('Image uploaded:', imageUrl, '(' + Math.round(jpegBuffer.length / 1024) + ' KB)');
 
-    var model = process.env.FAL_MODEL || 'fal-ai/nano-banana-2/edit';
-    console.log('fal.ai — model:', model, '| prompt:', prompt.substring(0, 80) + '...');
+    var model = process.env.RUNWAY_MODEL || 'gen4_image';
+    console.log('Runway — model:', model, '| prompt:', promptText.substring(0, 80) + '...');
 
-    /* Submit to fal.ai and wait for result */
-    var result = await fal.subscribe(model, {
-      input: {
-        prompt: prompt,
-        image_url: uploadedUrl
-      },
-      pollInterval: 3000
+    /* Submit task to Runway with HTTPS URL */
+    var task = await client.textToImage.create({
+      model: model,
+      promptText: promptText,
+      ratio: '1080:1440',
+      referenceImages: [
+        {
+          uri: imageUrl,
+          tag: 'photo'
+        }
+      ]
     });
 
-    console.log('fal.ai result received:', JSON.stringify(result.data).substring(0, 300));
+    console.log('Runway task created:', task.id);
 
-    /* Extract image URL from response */
-    var imageUrl = result.data?.images?.[0]?.url
-      || result.data?.image?.url
-      || result.data?.output?.url;
+    /* Wait for result (SDK handles polling) */
+    var result = await task.waitForTaskOutput({ pollIntervalMs: 3000 });
 
-    if (imageUrl) {
-      return res.json({ result: imageUrl });
+    console.log('Runway task completed, outputs:', result.output?.length);
+
+    if (result.output && result.output.length > 0) {
+      return res.json({ result: result.output[0] });
     }
 
-    console.error('No image in result:', JSON.stringify(result.data));
+    console.error('Task succeeded but no output:', JSON.stringify(result));
     return res.status(502).json({ error: 'Génération terminée mais aucune image reçue.' });
 
   } catch (err) {
@@ -105,17 +101,20 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
 
     var msg = err.message || 'Erreur interne.';
 
-    if (msg.includes('credentials') || msg.includes('Unauthorized') || msg.includes('401')) {
-      return res.status(500).json({ error: 'Clé API invalide. Contactez le barbershop.' });
+    if (err.constructor?.name === 'AuthenticationError') {
+      return res.status(500).json({ error: 'Clé API Runway invalide. Contactez le barbershop.' });
     }
-    if (msg.includes('NSFW') || msg.includes('safety') || msg.includes('moderation') || msg.includes('nsfw')) {
-      return res.status(400).json({ error: 'Photo rejetée par le filtre de sécurité. Essayez une autre photo.' });
+    if (err.constructor?.name === 'RateLimitError') {
+      return res.status(429).json({ error: 'Trop de requêtes. Réessayez dans quelques minutes.' });
     }
-    if (msg.includes('timeout') || msg.includes('Timeout')) {
+    if (err.constructor?.name === 'TaskFailedError') {
+      return res.status(502).json({ error: 'La génération a échoué. Essayez une autre photo ou un autre style.' });
+    }
+    if (err.constructor?.name === 'TaskTimedOutError') {
       return res.status(504).json({ error: 'Délai dépassé. Réessayez avec une photo plus petite.' });
     }
-    if (msg.includes('credits') || msg.includes('Credits') || msg.includes('402')) {
-      return res.status(402).json({ error: 'Crédits épuisés. Contactez le barbershop.' });
+    if (msg.includes('moderation') || msg.includes('safety') || msg.includes('NSFW')) {
+      return res.status(400).json({ error: 'Photo rejetée par le filtre de sécurité. Essayez une autre photo.' });
     }
 
     return res.status(502).json({ error: msg });
@@ -128,6 +127,8 @@ app.get('*', function (req, res) {
 });
 
 app.listen(PORT, function () {
-  var model = process.env.FAL_MODEL || 'fal-ai/nano-banana-2/edit';
-  console.log('BORA-BORA Barbershop on port ' + PORT + ' (' + model + ', key: ' + (falKey ? 'set' : 'MISSING') + ')');
+  var model = process.env.RUNWAY_MODEL || 'gen4_image';
+  var hasRunway = !!process.env.RUNWAY_API_KEY;
+  var hasFal = !!process.env.FAL_KEY;
+  console.log('BORA-BORA Barbershop on port ' + PORT + ' (Runway ' + model + ', key: ' + (hasRunway ? 'set' : 'MISSING') + ', image host: ' + (hasFal ? 'fal' : 'MISSING') + ')');
 });
