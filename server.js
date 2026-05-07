@@ -65,14 +65,23 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
     var base64Image = await compressImage(req.file.buffer);
     console.log('Image compressed:', Math.round(base64Image.length / 1024), 'KB');
 
-    var model = process.env.FAL_MODEL || 'fal-ai/flux-pro/kontext';
+    /* Upload image to fal storage for reliable processing */
+    var jpegBuffer = await sharp(req.file.buffer)
+      .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+    var imageFile = new File([jpegBuffer], 'photo.jpg', { type: 'image/jpeg' });
+    var uploadedUrl = await fal.storage.upload(imageFile);
+    console.log('Image uploaded to fal storage:', uploadedUrl);
+
+    var model = process.env.FAL_MODEL || 'fal-ai/nano-banana-2/edit';
     console.log('fal.ai — model:', model, '| prompt:', prompt.substring(0, 80) + '...');
 
     /* Submit to fal.ai and wait for result */
     var result = await fal.subscribe(model, {
       input: {
         prompt: prompt,
-        image_url: base64Image
+        image_url: uploadedUrl
       },
       pollInterval: 3000
     });
@@ -119,6 +128,6 @@ app.get('*', function (req, res) {
 });
 
 app.listen(PORT, function () {
-  var model = process.env.FAL_MODEL || 'fal-ai/flux-pro/kontext';
+  var model = process.env.FAL_MODEL || 'fal-ai/nano-banana-2/edit';
   console.log('BORA-BORA Barbershop on port ' + PORT + ' (' + model + ', key: ' + (falKey ? 'set' : 'MISSING') + ')');
 });
