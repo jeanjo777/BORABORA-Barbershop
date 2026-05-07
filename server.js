@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const multer = require('multer');
 const sharp = require('sharp');
-const { higgsfield } = require('@higgsfield/client/v2');
+const RunwayML = require('@runwayml/sdk');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,87 +25,82 @@ app.use(express.static(path.join(__dirname), {
   }
 }));
 
-/* --- Configure Higgsfield SDK --- */
-var hfKeyId = process.env.HIGGSFIELD_KEY_ID || '';
-var hfKeySecret = process.env.HIGGSFIELD_KEY_SECRET || '';
+/* --- Runway client (initialized on first use) --- */
+var runwayClient = null;
 
-if (hfKeyId && hfKeySecret) {
-  higgsfield.configure({ credentials: hfKeyId + ':' + hfKeySecret });
+function getRunwayClient() {
+  if (!runwayClient) {
+    var apiKey = process.env.RUNWAY_API_KEY;
+    if (!apiKey) throw new Error('RUNWAY_API_KEY non configurée.');
+    runwayClient = new RunwayML({ apiKey: apiKey });
+  }
+  return runwayClient;
 }
 
-/* --- Compress image for API (max 1500px, JPEG quality 85) --- */
+/* --- Compress image for API (max 1200px, JPEG quality 80, under 5MB data URI limit) --- */
 async function compressImage(buffer) {
-  const image = sharp(buffer);
-  const metadata = await image.metadata();
+  var image = sharp(buffer);
+  var metadata = await image.metadata();
 
-  let pipeline = image;
-  const maxDim = 1500;
+  var pipeline = image;
+  var maxDim = 1200;
 
   if (metadata.width > maxDim || metadata.height > maxDim) {
     pipeline = pipeline.resize(maxDim, maxDim, { fit: 'inside', withoutEnlargement: true });
   }
 
-  const compressed = await pipeline.jpeg({ quality: 85 }).toBuffer();
+  var compressed = await pipeline.jpeg({ quality: 80 }).toBuffer();
   return 'data:image/jpeg;base64,' + compressed.toString('base64');
 }
-
-/*
-   Available Higgsfield endpoints to try (set via HIGGSFIELD_MODEL env var):
-   - flux-pro/kontext/max                    (Flux Kontext Max — image editing)
-   - flux-pro/kontext/max/text-to-image      (text only, no input image)
-   - nano-banana-pro/inpaint                 (Nano Banana Pro inpaint)
-   - google/nano-banana-pro/edit             (Nano Banana Pro edit)
-   - higgsfield-ai/soul/standard             (Soul — text to image)
-   - bytedance/seedream/v4/text-to-image     (Seedream — text only)
-*/
-var DEFAULT_MODEL = 'flux-pro/kontext/max';
 
 /* --- Simulate hairstyle API --- */
 app.post('/api/simulate', upload.single('photo'), async function (req, res) {
   try {
-    if (!hfKeyId || !hfKeySecret) {
-      return res.status(500).json({ error: 'API non configurée. Contactez le barbershop.' });
-    }
+    var client = getRunwayClient();
 
     if (!req.file) {
       return res.status(400).json({ error: 'Aucune photo reçue.' });
     }
 
-    var prompt = req.body.prompt || 'modern fade haircut';
-    var fullPrompt = 'Edit this photo: change ONLY the hairstyle to ' + prompt + '. Keep the exact same person, face, skin tone, background, and clothing. Only modify the hair.';
+    var stylePrompt = req.body.prompt || 'modern fade haircut';
+    var promptText = 'Portrait photo of @photo with a ' + stylePrompt + '. Keep the exact same person — same face, same eyes, same skin tone, same background. Only the hairstyle is different. Photorealistic, natural lighting, barbershop quality.';
 
-    /* Compress image */
+    /* Compress image (Runway data URI limit: 5MB) */
     var base64Image = await compressImage(req.file.buffer);
     console.log('Image compressed:', Math.round(base64Image.length / 1024), 'KB');
 
-    var model = process.env.HIGGSFIELD_MODEL || DEFAULT_MODEL;
-    console.log('Calling Higgsfield model:', model);
-
-    /* Call Higgsfield via SDK — handles queue + polling */
-    var result = await higgsfield.subscribe(model, {
-      input: {
-        prompt: fullPrompt,
-        image_url: base64Image,
-        aspect_ratio: '3:4',
-        safety_tolerance: 2
-      }
-    });
-
-    console.log('Higgsfield result:', JSON.stringify(result).substring(0, 600));
-
-    /* Extract image URL from response (try various response shapes) */
-    var imageUrl = result.images?.[0]?.url
-      || result.output?.images?.[0]?.url
-      || result.result?.images?.[0]?.url
-      || result.result?.url
-      || result.sample?.url
-      || result.data?.images?.[0]?.url;
-
-    if (imageUrl) {
-      return res.json({ result: imageUrl });
+    if (base64Image.length > 5 * 1024 * 1024) {
+      return res.status(400).json({ error: 'Image trop lourde après compression. Essayez une photo plus petite.' });
     }
 
-    console.error('No image URL in result:', JSON.stringify(result));
+    var model = process.env.RUNWAY_MODEL || 'gen4_image';
+    console.log('Runway — model:', model, '| prompt:', promptText.substring(0, 80) + '...');
+
+    /* Submit task to Runway */
+    var task = await client.textToImage.create({
+      model: model,
+      promptText: promptText,
+      ratio: '1080:1440',
+      referenceImages: [
+        {
+          uri: base64Image,
+          tag: 'photo'
+        }
+      ]
+    });
+
+    console.log('Runway task created:', task.id);
+
+    /* Wait for result (SDK handles polling) */
+    var result = await task.waitForTaskOutput({ pollIntervalMs: 3000 });
+
+    console.log('Runway task completed, outputs:', result.output?.length);
+
+    if (result.output && result.output.length > 0) {
+      return res.json({ result: result.output[0] });
+    }
+
+    console.error('Task succeeded but no output:', JSON.stringify(result));
     return res.status(502).json({ error: 'Génération terminée mais aucune image reçue.' });
 
   } catch (err) {
@@ -113,14 +108,21 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
 
     var msg = err.message || 'Erreur interne.';
 
-    if (msg.includes('NSFW') || msg.includes('safety') || msg.includes('moderation')) {
-      return res.status(400).json({ error: 'Photo rejetée par le filtre de sécurité. Essayez une autre photo.' });
+    /* Map SDK error types to user-friendly messages */
+    if (err.constructor?.name === 'AuthenticationError') {
+      return res.status(500).json({ error: 'Clé API Runway invalide. Contactez le barbershop.' });
     }
-    if (msg.includes('credits') || msg.includes('Credits')) {
-      return res.status(402).json({ error: 'Crédits Higgsfield épuisés. Contactez le barbershop.' });
+    if (err.constructor?.name === 'RateLimitError') {
+      return res.status(429).json({ error: 'Trop de requêtes. Réessayez dans quelques minutes.' });
     }
-    if (msg.includes('timeout') || msg.includes('Timeout')) {
+    if (err.constructor?.name === 'TaskFailedError') {
+      return res.status(502).json({ error: 'La génération a échoué. Essayez une autre photo ou un autre style.' });
+    }
+    if (err.constructor?.name === 'TaskTimedOutError') {
       return res.status(504).json({ error: 'Délai dépassé. Réessayez avec une photo plus petite.' });
+    }
+    if (msg.includes('moderation') || msg.includes('safety') || msg.includes('NSFW')) {
+      return res.status(400).json({ error: 'Photo rejetée par le filtre de sécurité. Essayez une autre photo.' });
     }
 
     return res.status(502).json({ error: msg });
@@ -133,7 +135,7 @@ app.get('*', function (req, res) {
 });
 
 app.listen(PORT, function () {
-  var model = process.env.HIGGSFIELD_MODEL || DEFAULT_MODEL;
-  var status = (hfKeyId && hfKeySecret) ? 'configured' : 'NOT configured';
-  console.log('BORA-BORA Barbershop on port ' + PORT + ' (Higgsfield: ' + status + ', model: ' + model + ')');
+  var model = process.env.RUNWAY_MODEL || 'gen4_image';
+  var hasKey = !!process.env.RUNWAY_API_KEY;
+  console.log('BORA-BORA Barbershop on port ' + PORT + ' (Runway ' + model + ', key: ' + (hasKey ? 'set' : 'MISSING') + ')');
 });
