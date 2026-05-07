@@ -686,6 +686,17 @@ ul {
 .service-card__icon {
   color: var(--color-accent);
   margin-bottom: var(--space-md);
+  transition: transform var(--duration-normal) var(--ease-out),
+              filter var(--duration-normal) var(--ease-out);
+}
+
+.service-card:hover .service-card__icon {
+  transform: scale(1.2) translateY(-2px);
+  filter: drop-shadow(0 0 8px rgba(46, 204, 64, 0.4));
+}
+
+.service-card:hover .service-card__icon svg {
+  stroke: var(--color-accent-light);
 }
 
 .service-card__title {
@@ -847,6 +858,17 @@ ul {
 
 .hours__table tr:last-child td {
   border-bottom: none;
+}
+
+.hours__closed td:first-child {
+  color: var(--color-text-subtle);
+}
+
+.hours__closed td:last-child {
+  color: var(--color-stripe-red);
+  font-weight: 500;
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
 }
 
 .hours__note {

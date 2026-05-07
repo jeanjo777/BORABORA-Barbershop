@@ -40,9 +40,37 @@
     });
   });
 
+  /* --- Hero parallax --- */
+  var heroImage = document.querySelector('.hero__image');
+  var heroSection = document.querySelector('.hero');
+
+  if (heroImage && heroSection && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var heroHeight = 0;
+    var ticking = false;
+
+    function updateParallax() {
+      if (window.scrollY < heroHeight) {
+        heroImage.style.transform = 'translateY(' + (window.scrollY * 0.35) + 'px) scale(1.08)';
+      }
+      ticking = false;
+    }
+
+    function onScrollParallax() {
+      heroHeight = heroSection.offsetHeight;
+      if (!ticking) {
+        requestAnimationFrame(updateParallax);
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', onScrollParallax, { passive: true });
+    heroImage.style.willChange = 'transform';
+    heroImage.style.transform = 'translateY(0) scale(1.08)';
+  }
+
   /* --- Scroll reveal --- */
   var revealTargets = document.querySelectorAll(
-    '.about__grid, .service-card, .gallery__item, .gallery__placeholder-item, .hours__grid, .contact__grid, .section-label, .section-title'
+    '.about__grid, .service-card, .gallery__placeholder-item, .hours__grid, .contact__grid, .section-label, .section-title'
   );
 
   revealTargets.forEach(function (el) {
@@ -319,6 +347,7 @@
   );
 
   galleryRevealItems.forEach(function (el) {
+    el.classList.add('reveal');
     galleryObserver.observe(el);
   });
 
