@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Simulateur de coupe homme IA — BORA-BORA Barbershop. Essayez une nouvelle coupe avant votre rendez-vous.">
+  <title>Simulateur Coupe Homme | BORA-BORA Barbershop</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="stylesheet" href="css/homme.css?v=1">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='56%25' text-anchor='middle' font-family='Oswald, sans-serif' font-size='28' font-weight='700' fill='%232ecc40'%3EBB%3C/text%3E%3C/svg%3E">
+</head>
+<body data-gender="homme">
+
+  <a href="#main" class="skip-link">Aller au contenu principal</a>
+
+  <!-- Navigation -->
+  <nav class="nav nav--scrolled" id="nav">
+    <div class="nav__container">
+      <a href="index.html" class="nav__logo">Bora<span>-</span>Bora</a>
+      <button class="nav__toggle" id="navToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav__menu" id="navMenu" role="list">
+        <li><a href="index.html#about" class="nav__link">Le Barbershop</a></li>
+        <li><a href="index.html#services" class="nav__link">Services</a></li>
+        <li><a href="index.html#gallery" class="nav__link">Galerie</a></li>
+        <li><a href="simulator.html" class="nav__link">Simulateur v1</a></li>
+        <li><a href="homme.html" class="nav__link nav__link--active">Simulateur v2</a></li>
+        <li><a href="index.html#contact" class="nav__link nav__link--cta">Rendez-vous</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- Hero intro -->
+    <section class="sim-hero">
+      <div class="container">
+        <p class="section-label">Simulateur IA</p>
+        <h1 class="section-title">Teste ta <em>coupe</em></h1>
+        <p class="sim-hero__desc">Photo + style = aperçu réaliste en quelques secondes.</p>
+      </div>
+    </section>
+
+    <div class="container sim-layout">
+
+      <!-- LEFT: Form -->
+      <section class="sim-panel">
+        <div class="sim-step">
+          <span class="sim-step__number">1</span>
+          <h2 class="sim-step__title">Photo + coupe</h2>
+        </div>
+
+        <form id="hommeForm">
+          <div class="photo-actions">
+            <input id="cam" type="file" accept="image/*" capture="user">
+            <label for="cam">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Caméra
+            </label>
+            <input id="upload" type="file" accept="image/*">
+            <label for="upload">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Image
+            </label>
+          </div>
+
+          <div class="upload-preview" id="uploadPreview">
+            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color:var(--color-accent);opacity:0.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>Ta photo apparaîtra ici</span>
+          </div>
+
+          <fieldset class="styles-fieldset">
+            <legend class="sim-step" style="margin-bottom:var(--space-sm)">
+              <span class="sim-step__number">2</span>
+              <span class="sim-step__title">Choisis ta coupe</span>
+            </legend>
+            <div class="sim-styles" id="styleList">
+              <label class="sim-style"><input type="radio" name="styleId" value="fade-classique" data-prompt="classic fade haircut, short sides gradually blending into longer hair on top, clean line-up, barber precision" checked><span class="sim-style__name">Fade classique</span><span class="sim-style__desc">Dégradé progressif net</span></label>
+              <label class="sim-style"><input type="radio" name="styleId" value="degrade-afro" data-prompt="tapered afro fade with natural textured curls on top, clean skin fade on sides, precise edge-up"><span class="sim-style__name">Dégradé afro</span><span class="sim-style__desc">Texture naturelle + fade</span></label>
+              <label class="sim-style"><input type="radio" name="styleId" value="buzz-cut" data-prompt="uniform very short buzz cut, clean and even all around, sharp hairline, military precision"><span class="sim-style__name">Buzz cut</span><span class="sim-style__desc">Ultra court uniforme</span></label>
+              <label class="sim-style"><input type="radio" name="styleId" value="pompadour" data-prompt="modern pompadour with volume swept back on top, tapered sides, polished structured styling"><span class="sim-style__name">Pompadour</span><span class="sim-style__desc">Volume structuré</span></label>
+              <label class="sim-style"><input type="radio" name="styleId" value="textured-crop" data-prompt="textured crop with choppy layered fringe on top, faded sides, modern messy texture"><span class="sim-style__name">Textured crop</span><span class="sim-style__desc">Frange texturée moderne</span></label>
+              <label class="sim-style"><input type="radio" name="styleId" value="undercut" data-prompt="disconnected undercut with longer styled hair on top and closely shaved sides, sharp contrast"><span class="sim-style__name">Undercut</span><span class="sim-style__desc">Contraste haut / rasé</span></label>
+              <label class="sim-style"><input type="radio" name="styleId" value="slick-back" data-prompt="slicked back hairstyle with hair combed smoothly backwards, tapered sides, glossy polished finish"><span class="sim-style__name">Slick back</span><span class="sim-style__desc">Plaqué élégant</span></label>
+              <label class="sim-style"><input type="radio" name="styleId" value="waves-360" data-prompt="360 waves with defined wave pattern all around the head, low taper fade on sides, precise line-up"><span class="sim-style__name">Waves 360</span><span class="sim-style__desc">Ondulations définies</span></label>
+              <label class="sim-style"><input type="radio" name="styleId" value="taper-fade" data-prompt="taper fade with gradual length transition, longer natural hair on top, clean neckline and temple taper"><span class="sim-style__name">Taper fade</span><span class="sim-style__desc">Dégradé naturel</span></label>
+              <label class="sim-style"><input type="radio" name="styleId" value="french-crop" data-prompt="French crop with straight textured fringe across forehead, faded sides, clean structured look"><span class="sim-style__name">French crop</span><span class="sim-style__desc">Frange droite + dégradé</span></label>
+            </div>
+          </fieldset>
+
+          <div class="options-grid">
+            <div class="field">
+              <label for="len">Longueur dessus</label>
+              <select id="len" name="length">
+                <option value="ras">Ras</option>
+                <option value="tres_court">Très court</option>
+                <option value="court" selected>Court</option>
+                <option value="mi_long">Mi-long</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="col">Couleur</label>
+              <select id="col" name="color">
+                <option value="noir" selected>Noir</option>
+                <option value="brun">Brun</option>
+                <option value="chatain">Châtain</option>
+                <option value="blond">Blond</option>
+                <option value="decolore">Décoloré</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="fin">Finition</label>
+              <select id="fin" name="finish">
+                <option value="naturel" selected>Naturel</option>
+                <option value="mat">Mat</option>
+                <option value="brillant">Brillant</option>
+                <option value="texture">Texturé</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="deg">Dégradé</label>
+              <select id="deg" name="fade">
+                <option value="sans" selected>Sans</option>
+                <option value="low">Low fade</option>
+                <option value="mid">Mid fade</option>
+                <option value="high">High fade</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sim-actions">
+            <button class="btn btn--primary btn--full" type="submit" id="generateBtn">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Générer mon aperçu
+            </button>
+          </div>
+        </form>
+
+        <div class="sim-status" id="simStatus" aria-live="polite"></div>
+      </section>
+
+      <!-- RIGHT: Result -->
+      <section class="sim-panel">
+        <div class="sim-step">
+          <span class="sim-step__number">3</span>
+          <h2 class="sim-step__title">Ton aperçu</h2>
+        </div>
+
+        <div class="result-placeholder" id="resultPlaceholder">
+          <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" style="color:var(--color-accent);opacity:0.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <strong>Aucun rendu pour l'instant</strong>
+          <span>Génère un aperçu pour voir le résultat.</span>
+        </div>
+
+        <!-- Loading -->
+        <div id="simLoading" hidden style="text-align:center;padding:3rem 1rem;">
+          <div style="width:48px;height:48px;border:3px solid var(--color-surface);border-top-color:var(--color-accent);border-radius:50%;margin:0 auto;animation:spin 0.8s linear infinite;"></div>
+          <p style="font-family:var(--font-display);font-size:var(--text-base);text-transform:uppercase;letter-spacing:.06em;margin-top:1.5rem;" id="loadingStep">Envoi de la photo…</p>
+          <span style="font-size:var(--text-xs);color:var(--color-text-subtle);">Environ 20 à 40 secondes</span>
+        </div>
+        <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+
+        <img class="result-image" id="resultImage" alt="Aperçu coupe homme IA" hidden>
+
+        <div class="result-summary" id="resultSummary" hidden>
+          <h3 id="resultTitle">Style retenu</h3>
+          <p id="resultText"></p>
+        </div>
+
+        <div class="sim-actions" id="resultActions" hidden>
+          <a class="btn btn--outline" href="#" target="_blank" id="openLink">Ouvrir l'image</a>
+          <a class="btn btn--primary" href="index.html#contact" id="bookLink">Réserver ce look</a>
+        </div>
+
+        <!-- Tips -->
+        <div style="margin-top:1.5rem;padding:1rem 1.25rem;background:rgba(46,204,64,.03);border:1px solid rgba(46,204,64,.12);border-radius:8px;">
+          <p style="font-family:var(--font-display);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--color-accent);margin-bottom:.5rem;">Conseils</p>
+          <ul style="font-size:.75rem;color:var(--color-text-muted);line-height:1.65;list-style:none;padding:0;">
+            <li style="padding-left:1rem;position:relative;">Photo de face, lumière naturelle, sans lunettes ni chapeau.<span style="position:absolute;left:0;top:.55em;width:4px;height:4px;background:var(--color-accent);border-radius:50%;"></span></li>
+            <li style="padding-left:1rem;position:relative;margin-top:.25rem;">Le résultat est une estimation IA — le rendu final dépend de la texture de vos cheveux.<span style="position:absolute;left:0;top:.55em;width:4px;height:4px;background:var(--color-accent);border-radius:50%;"></span></li>
+          </ul>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a href="index.html" class="footer__logo">Bora<span>-</span>Bora</a>
+          <p class="footer__tagline">BarberShop 4Men's — Lévis</p>
+        </div>
+        <nav class="footer__nav" aria-label="Navigation pied de page">
+          <a href="index.html#about">Le Barbershop</a>
+          <a href="index.html#services">Services</a>
+          <a href="index.html#gallery">Galerie</a>
+          <a href="homme.html">Simulateur</a>
+          <a href="index.html#contact">Contact</a>
+        </nav>
+      </div>
+      <div class="footer__bottom">
+        <p>&copy; 2026 BORA-BORA Barbershop. Tous droits réservés.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js?v=5"></script>
+  <script src="js/homme-simulator.js?v=1"></script>
+</body>
+</html>
