@@ -11,6 +11,8 @@
 
   var camInput = document.getElementById('cam');
   var uploadInput = document.getElementById('upload');
+  var btnCamera = document.getElementById('btnCamera');
+  var btnFile = document.getElementById('btnFile');
   var previewZone = document.getElementById('uploadPreview');
   var generateBtn = document.getElementById('generateBtn');
   var simStatus = document.getElementById('simStatus');
@@ -47,6 +49,8 @@
     setStatus('Photo ajoutée. Choisis ta coupe puis lance la simulation.', 'success');
   }
 
+  if (btnCamera) btnCamera.addEventListener('click', function () { camInput && camInput.click(); });
+  if (btnFile) btnFile.addEventListener('click', function () { uploadInput && uploadInput.click(); });
   if (camInput) camInput.addEventListener('change', function () { handleFile(camInput); });
   if (uploadInput) uploadInput.addEventListener('change', function () { handleFile(uploadInput); });
 

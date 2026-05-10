@@ -255,19 +255,13 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
   margin-bottom: var(--space-md);
 }
 
-.photo-actions input {
-  position: absolute;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-}
-
-.photo-actions label {
+.photo-btn {
+  flex: 1;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-xs);
-  padding: 12px 24px;
+  padding: 14px 24px;
   border: 1px solid var(--color-surface);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -277,14 +271,20 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-text-muted);
+  background: var(--color-bg);
   transition: all var(--duration-normal) var(--ease-out);
-  flex: 1;
-  justify-content: center;
+  min-height: 48px;
 }
 
-.photo-actions label:hover {
+.photo-btn:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
+  background: rgba(46, 204, 64, 0.05);
+}
+
+.photo-btn svg {
+  color: var(--color-accent);
+  flex-shrink: 0;
 }
 
 /* Upload preview */
@@ -628,7 +628,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
   .options-grid { grid-template-columns: 1fr; }
 
   .photo-actions { flex-direction: column; }
-  .photo-actions label { width: 100%; }
+  .photo-btn { width: 100%; }
 
   .sim-step__title { font-size: var(--text-lg); }
 }
