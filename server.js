@@ -58,7 +58,7 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
     var dataUri = 'data:image/jpeg;base64,' + jpegBuffer.toString('base64');
     console.log('Image prepared:', Math.round(jpegBuffer.length / 1024), 'KB');
 
-    var model = process.env.RUNWAY_MODEL || 'gen4_image_turbo';
+    var model = process.env.RUNWAY_MODEL || 'gemini_image3_pro';
     console.log('Runway — model:', model, '| prompt:', promptText.substring(0, 80) + '...');
 
     /* Submit task to Runway with data URI */
