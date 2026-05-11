@@ -74,19 +74,34 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
       ]
     });
 
-    console.log('Runway task created:', task.id);
+    var taskId = task.id;
+    console.log('Runway task created:', taskId);
 
-    /* Wait for result (SDK handles polling) */
-    var result = await task.waitForTaskOutput({ pollIntervalMs: 3000 });
-
-    console.log('Runway task completed, outputs:', result.output?.length);
-
-    if (result.output && result.output.length > 0) {
-      return res.json({ result: result.output[0] });
+    /* Poll for result */
+    var apiKey = process.env.RUNWAY_API_KEY;
+    for (var i = 0; i < 60; i++) {
+      await new Promise(function (r) { setTimeout(r, 3000); });
+      var pollRes = await fetch('https://api.dev.runwayml.com/v1/tasks/' + taskId, {
+        headers: { 'Authorization': 'Bearer ' + apiKey, 'X-Runway-Version': '2024-11-06' }
+      });
+      if (!pollRes.ok) { if (pollRes.status >= 500) continue; throw new Error('Polling failed: ' + pollRes.status); }
+      var pollData = await pollRes.json();
+      var status = String(pollData.status || '').toUpperCase();
+      if (status === 'SUCCEEDED') {
+        var outputUrl = pollData.output && pollData.output[0];
+        if (outputUrl) {
+          console.log('Runway task completed');
+          return res.json({ result: outputUrl });
+        }
+        console.error('Task succeeded but no output:', JSON.stringify(pollData));
+        return res.status(502).json({ error: 'Génération terminée mais aucune image reçue.' });
+      }
+      if (status === 'FAILED') {
+        console.error('Runway task failed:', JSON.stringify(pollData));
+        throw new Error(pollData.failure || pollData.error || 'La génération a échoué.');
+      }
     }
-
-    console.error('Task succeeded but no output:', JSON.stringify(result));
-    return res.status(502).json({ error: 'Génération terminée mais aucune image reçue.' });
+    throw new Error('Temps d\'attente dépassé.');
 
   } catch (err) {
     console.error('Simulate error:', err.message || err);
