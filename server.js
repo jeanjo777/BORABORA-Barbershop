@@ -3,16 +3,9 @@ const path = require('path');
 const multer = require('multer');
 const sharp = require('sharp');
 const RunwayML = require('@runwayml/sdk');
-const { fal } = require('@fal-ai/client');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-/* --- Configure fal.ai (used only for image hosting) --- */
-var falKey = process.env.FAL_KEY || '';
-if (falKey) {
-  fal.config({ credentials: falKey });
-}
 
 /* --- Runway client (initialized on first use) --- */
 var runwayClient = null;
@@ -56,27 +49,26 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
     var stylePrompt = req.body.prompt || 'modern fade haircut';
     var promptText = 'This is a photo of @photo. Change ONLY the hairstyle to ' + stylePrompt + '. The person must be IDENTICAL to @photo — same face, same eyes, same skin tone, same background, same clothing. Only the hair changes. Photorealistic, natural lighting.';
 
-    /* Compress and upload image to get HTTPS URL (Runway requires HTTPS, not data URI) */
+    /* Compress image and convert to data URI for Runway */
     var jpegBuffer = await sharp(req.file.buffer)
-      .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
+      .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
       .jpeg({ quality: 80 })
       .toBuffer();
 
-    var imageFile = new File([jpegBuffer], 'photo.jpg', { type: 'image/jpeg' });
-    var imageUrl = await fal.storage.upload(imageFile);
-    console.log('Image uploaded:', imageUrl, '(' + Math.round(jpegBuffer.length / 1024) + ' KB)');
+    var dataUri = 'data:image/jpeg;base64,' + jpegBuffer.toString('base64');
+    console.log('Image prepared:', Math.round(jpegBuffer.length / 1024), 'KB');
 
     var model = process.env.RUNWAY_MODEL || 'gen4_image';
     console.log('Runway — model:', model, '| prompt:', promptText.substring(0, 80) + '...');
 
-    /* Submit task to Runway with HTTPS URL */
+    /* Submit task to Runway with data URI */
     var task = await client.textToImage.create({
       model: model,
       promptText: promptText,
       ratio: '1080:1440',
       referenceImages: [
         {
-          uri: imageUrl,
+          uri: dataUri,
           tag: 'photo'
         }
       ]
@@ -129,6 +121,5 @@ app.get('*', function (req, res) {
 app.listen(PORT, function () {
   var model = process.env.RUNWAY_MODEL || 'gen4_image';
   var hasRunway = !!process.env.RUNWAY_API_KEY;
-  var hasFal = !!process.env.FAL_KEY;
-  console.log('BORA-BORA Barbershop on port ' + PORT + ' (Runway ' + model + ', key: ' + (hasRunway ? 'set' : 'MISSING') + ', image host: ' + (hasFal ? 'fal' : 'MISSING') + ')');
+  console.log('BORA-BORA Barbershop on port ' + PORT + ' (Runway ' + model + ', key: ' + (hasRunway ? 'set' : 'MISSING') + ')');
 });
