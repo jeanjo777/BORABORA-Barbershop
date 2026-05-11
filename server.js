@@ -47,7 +47,7 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
     }
 
     var stylePrompt = req.body.prompt || 'modern fade haircut';
-    var promptText = 'This is a photo of @photo. Change ONLY the hairstyle to ' + stylePrompt + '. The person must be IDENTICAL to @photo — same face, same eyes, same skin tone, same background, same clothing. Only the hair changes. Photorealistic, natural lighting.';
+    var promptText = 'A photorealistic portrait of @subject with a ' + stylePrompt + '. This is the EXACT same person as @subject — preserve every facial feature, skin tone, eye color, jawline, expression, and head shape. Keep the same lighting, background, clothing, and camera angle. The ONLY change is the hairstyle. Professional barbershop photography, sharp focus.';
 
     /* Compress image and convert to data URI for Runway */
     var jpegBuffer = await sharp(req.file.buffer)
@@ -58,7 +58,7 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
     var dataUri = 'data:image/jpeg;base64,' + jpegBuffer.toString('base64');
     console.log('Image prepared:', Math.round(jpegBuffer.length / 1024), 'KB');
 
-    var model = process.env.RUNWAY_MODEL || 'gen4_image';
+    var model = process.env.RUNWAY_MODEL || 'gen4_image_turbo';
     console.log('Runway — model:', model, '| prompt:', promptText.substring(0, 80) + '...');
 
     /* Submit task to Runway with data URI */
@@ -69,7 +69,7 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
       referenceImages: [
         {
           uri: dataUri,
-          tag: 'photo'
+          tag: 'subject'
         }
       ]
     });
