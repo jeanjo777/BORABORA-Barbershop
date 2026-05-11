@@ -11,8 +11,6 @@
 
   var camInput = document.getElementById('cam');
   var uploadInput = document.getElementById('upload');
-  var btnCamera = document.getElementById('btnCamera');
-  var btnFile = document.getElementById('btnFile');
   var previewZone = document.getElementById('uploadPreview');
   var generateBtn = document.getElementById('generateBtn');
   var simStatus = document.getElementById('simStatus');
@@ -35,8 +33,7 @@
     simStatus.hidden = !msg;
   }
 
-  function handleFile(input) {
-    var file = input && input.files && input.files[0];
+  function handleFile(file) {
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
       setStatus('Image trop lourde. Maximum 10 Mo.', 'error');
@@ -45,14 +42,31 @@
     state.file = file;
     var url = URL.createObjectURL(file);
     previewZone.innerHTML = '<img src="' + url + '" alt="Photo ajoutée">';
-    input.value = '';
     setStatus('Photo ajoutée. Choisis ta coupe puis lance la simulation.', 'success');
   }
 
-  if (btnCamera) btnCamera.addEventListener('click', function () { camInput && camInput.click(); });
-  if (btnFile) btnFile.addEventListener('click', function () { uploadInput && uploadInput.click(); });
-  if (camInput) camInput.addEventListener('change', function () { handleFile(camInput); });
-  if (uploadInput) uploadInput.addEventListener('change', function () { handleFile(uploadInput); });
+  /* Camera button — create a fresh input each time for mobile compatibility */
+  document.getElementById('btnCamera').addEventListener('click', function () {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'user';
+    input.onchange = function () {
+      if (input.files && input.files[0]) handleFile(input.files[0]);
+    };
+    input.click();
+  });
+
+  /* File/gallery button */
+  document.getElementById('btnFile').addEventListener('click', function () {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function () {
+      if (input.files && input.files[0]) handleFile(input.files[0]);
+    };
+    input.click();
+  });
 
   /* Build prompt from selected style + options */
   function buildPrompt() {
