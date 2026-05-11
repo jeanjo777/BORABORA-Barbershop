@@ -33,16 +33,50 @@
     simStatus.hidden = !msg;
   }
 
+  function compressImage(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var maxSize = 1024;
+        var w = img.width;
+        var h = img.height;
+        if (w > maxSize || h > maxSize) {
+          var ratio = Math.min(maxSize / w, maxSize / h);
+          w = Math.round(w * ratio);
+          h = Math.round(h * ratio);
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(function (blob) {
+          if (!blob) { reject(new Error('Compression échouée.')); return; }
+          resolve(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
+        }, 'image/jpeg', 0.80);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Image illisible.')); };
+      img.src = url;
+    });
+  }
+
   function handleFile(file) {
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      setStatus('Image trop lourde. Maximum 10 Mo.', 'error');
+    if (file.size > 15 * 1024 * 1024) {
+      setStatus('Image trop lourde. Maximum 15 Mo.', 'error');
       return;
     }
-    state.file = file;
-    var url = URL.createObjectURL(file);
-    previewZone.innerHTML = '<img src="' + url + '" alt="Photo ajoutée">';
-    setStatus('Photo ajoutée. Choisis ta coupe puis lance la simulation.', 'success');
+    setStatus('Compression de la photo…', 'warning');
+    compressImage(file).then(function (compressed) {
+      state.file = compressed;
+      var url = URL.createObjectURL(compressed);
+      previewZone.innerHTML = '<img src="' + url + '" alt="Photo ajoutée">';
+      var sizeKb = Math.round(compressed.size / 1024);
+      setStatus('Photo ajoutée (' + sizeKb + ' Ko). Choisis ta coupe puis lance la simulation.', 'success');
+    }).catch(function (err) {
+      setStatus(err.message || 'Erreur de compression.', 'error');
+    });
   }
 
   /* Camera button — create a fresh input each time for mobile compatibility */
