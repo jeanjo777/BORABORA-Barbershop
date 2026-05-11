@@ -65,7 +65,7 @@ app.post('/api/simulate', upload.single('photo'), async function (req, res) {
     var task = await client.textToImage.create({
       model: model,
       promptText: promptText,
-      ratio: '1080:1440',
+      ratio: '1024:1024',
       referenceImages: [
         {
           uri: dataUri,
